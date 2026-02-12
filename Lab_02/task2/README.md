@@ -1,8 +1,22 @@
-# CacheManager - Singleton Pattern LRU Cache
+# Lab 2: Pattern Documentation & GoF
 
-## Описание
+## Lab 2.1 - Retry with Backoff Pattern
 
-CacheManager реализует паттерн Singleton с LRU (Least Recently Used) эвикцией. Гарантирует единственный экземпляр кэша с O(1) операциями.
+**Паттерн:** Behavioral (управляет поведением операции во времени)
+
+**Суть:** Оборачивает асинхронную операцию в цикл повторов с exponential backoff задержкой.
+
+**Применение:** API запросы, сетевые операции, временные сбои
+
+**Код:** `retryOperation(operation, maxRetries, delay)`
+
+---
+
+## Lab 2.2 - CacheManager Singleton Pattern
+
+**Паттерн:** Creational (Singleton)
+
+**Суть:** CacheManager реализует паттерн Singleton с LRU (Least Recently Used) эвикцией. Гарантирует единственный экземпляр кэша с O(1) операциями.
 
 ## Структура
 
