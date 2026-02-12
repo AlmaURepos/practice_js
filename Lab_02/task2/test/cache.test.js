@@ -12,20 +12,15 @@ class TestRunner {
   }
 
   async run() {
-    console.log('\n╔════════════════════════════════════════════════════════════╗');
-    console.log('║           CacheManager Unit Tests - Test Suite             ║');
-    console.log('╚════════════════════════════════════════════════════════════╝\n');
-
     for (const { description, testFn } of this.tests) {
       try {
         CacheManager.reset();
         await testFn();
         this.passed++;
-        console.log(`✓ PASS: ${description}`);
       } catch (error) {
         this.failed++;
         console.log(`✗ FAIL: ${description}`);
-        console.log(`  Error: ${error.message}\n`);
+        console.log(`  Error: ${error.message}`);
       }
     }
 
@@ -62,16 +57,11 @@ class TestRunner {
 
   printSummary() {
     const total = this.passed + this.failed;
-    console.log('\n════════════════════════════════════════════════════════════');
-    console.log(`Tests run: ${total}`);
-    console.log(`Passed: ${this.passed}`);
-    console.log(`Failed: ${this.failed}`);
-    console.log('════════════════════════════════════════════════════════════\n');
-
-    if (this.failed === 0) {
-      console.log('🎉 All tests passed!\n');
+    console.log(`\nTests: ${this.passed}/${total} passed`);
+    if (this.failed > 0) {
+      console.log(`Failed: ${this.failed}\n`);
     } else {
-      console.log(`⚠️  ${this.failed} test(s) failed!\n`);
+      console.log('');
     }
   }
 }
