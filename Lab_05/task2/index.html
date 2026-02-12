@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1 id="title"></h1>
+    <input type="text" id="todoInput">
+    <button id="addBtn">Add</button>
+    <button id="statsBtn">Show stats</button>
+    <ul id="todoList"></ul>
+    <div style="height: 800px;"></div>
+    <div id="lazyContainer">Scroll to load component</div>
+
+
+    <script type="module">
+        import "./modules/app.mjs"
+
+        document.getElementById('statsBtn').addEventListener('click', async () => {
+            try {
+                const module = await import('./modules/advanced_feature.mjs');
+                module.showStatistics([]);
+                
+            } catch (error) {
+                console.error('Error loading module:', error);  
+                
+            }
+        });
+
+        const observer = new IntersectionObserver( async (entries) => {
+            if (entries[0].isIntersecting) {
+                try {
+                    const module = await import('./modules/lazy_component.mjs');
+                    module.loadLazyComponent();
+                    observer.disconnect();
+                } catch (error) {
+                    console.error('Error loading lazy component:', error);
+                }
+            }
+        });
+
+        observer.observe(document.getElementById('lazyContainer'));
+
+    </script>
+</body>
+</html>
