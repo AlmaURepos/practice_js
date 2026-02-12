@@ -1,0 +1,26 @@
+{
+  "name": "cache-manager-singleton",
+  "version": "1.0.0",
+  "description": "CacheManager - Singleton pattern implementation with LRU eviction strategy",
+  "main": "src/CacheManager.js",
+  "scripts": {
+    "start": "node src/example.js",
+    "test": "node test/cache.test.js",
+    "example": "node src/example.js"
+  },
+  "keywords": [
+    "cache",
+    "singleton",
+    "design-pattern",
+    "lru",
+    "pattern-documentation",
+    "gof"
+  ],
+  "author": "Student",
+  "license": "Educational",
+  "course": "Week 2 Lab 02 - Pattern Documentation & GoF",
+  "assignment": "Lab 2.2 - Pattern Refactoring and Documentation",
+  "pattern": "Singleton (Creational Pattern)",
+  "dependencies": {},
+  "devDependencies": {}
+}
