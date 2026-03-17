@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            text-align: center;
+        }
+        canvas{
+            border: 1px solid black;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Flyweight demo</h2>
+    <button id="generate">generate forest</button>
+    <button id="render">render</button>
+
+    <p id="stats"></p>
+
+    <canvas id="forest" width="1000" height="600">
+         
+    
+    </canvas>
+    
+
+    <script type="module" >
+        import { ForestRenderer } from "./forest/ForestRenderer.js";
+        import { benchmark } from "./test/benchmark.js";
+
+        const forest = new ForestRenderer("forest");
+
+        document.getElementById("generate").addEventListener("click", () => {
+            forest.generateForest(1000);
+            document.getElementById("stats").textContent = "Forest generated with 1000 trees. Click 'render' to draw.";
+        });
+
+        document.getElementById("render").addEventListener("click", () => {
+            forest.render();
+            benchmark();
+        });
+    </script>
+</body>
+</html>

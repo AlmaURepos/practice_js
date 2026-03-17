@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<style>
+    .todo_item{
+        border: 1px solid black;
+        padding: 10px;
+        margin: 5px;
+    }
+</style>
+<body>
+    <h2>Todo </h2>
+    <button id="gen">generate 1000</button>
+    <div id="todo"></div>
+    <script type="module">
+        import {TodoList} from "./todo/TodoList.js";
+
+        const todoList = new TodoList("todo");
+        document.getElementById("gen").addEventListener("click", () => {
+            todoList.generateItems(1000);
+        });
+    </script>
+    
+</body>
+</html>
