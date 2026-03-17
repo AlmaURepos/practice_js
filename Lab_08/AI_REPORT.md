@@ -1,4 +1,4 @@
-# AI_REPORT - Lab 08
+# AI_REPORT - Lab 08  
 
 ## 1. Информация о использовании AI
 - Инструмент: GitHub Copilot (VS Code Extension)
