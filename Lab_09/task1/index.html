@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 09 Task 1 - Observer / Pub-Sub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+
+    .controls, .logs {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .controls {
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      margin-top: 8px;
+      margin-bottom: 8px;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+    }
+
+    button.secondary {
+      background: #6b7280;
+    }
+
+    .logs {
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .log-box {
+      min-height: 200px;
+      max-height: 350px;
+      overflow: auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .news-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: #fafafa;
+    }
+
+    .priority-urgent {
+      border-left: 6px solid #dc2626;
+      background: #fff1f2;
+    }
+
+    .priority-normal {
+      border-left: 6px solid #2563eb;
+    }
+
+    .stats {
+      background: #eef2ff;
+      padding: 12px;
+      border-radius: 10px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lab 09.1 — Observer / Pub-Sub</h1>
+
+  <div class="controls">
+    <div class="panel">
+      <h2>Публикация новости</h2>
+      <label>Категория</label>
+      <select id="category">
+        <option value="sports">sports</option>
+        <option value="tech">tech</option>
+        <option value="business">business</option>
+      </select>
+
+      <label>Заголовок</label>
+      <input id="headline" type="text" value="New headline" />
+
+      <label>Содержание</label>
+      <textarea id="content" rows="4">Some important news content...</textarea>
+
+      <label>Приоритет</label>
+      <select id="priority">
+        <option value="normal">normal</option>
+        <option value="urgent">urgent</option>
+      </select>
+
+      <button id="publish-btn">Опубликовать</button>
+      <button id="demo-btn" class="secondary">Запустить демо новости</button>
+    </div>
+
+    <div class="panel">
+      <h2>Управление подписками</h2>
+      <button id="subscribe-btn">Подписать всех</button>
+      <button id="unsubscribe-btn" class="secondary">Отписать всех</button>
+      <button id="once-btn" class="secondary">Одноразовая подписка на urgent</button>
+
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+
+  <div class="logs">
+    <div>
+      <h2>Email Log</h2>
+      <div id="email-log" class="log-box"></div>
+    </div>
+    <div>
+      <h2>Push Log</h2>
+      <div id="push-log" class="log-box"></div>
+    </div>
+    <div>
+      <h2>Dashboard Feed</h2>
+      <div id="dashboard-feed" class="log-box"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import eventBus from "./pubsub/EventBus.js";
+    import { NewsPublisher } from "./publisher/NewsPublisher.js";
+    import { EmailNotifier } from "./subscribers/EmailNotifier.js";
+    import { PushNotifier } from "./subscribers/PushNotifier.js";
+    import { DashboardWidget } from "./subscribers/DashboardWidget.js";
+
+    const publisher = new NewsPublisher("Global News");
+    const emailNotifier = new EmailNotifier("student@example.com");
+    const pushNotifier = new PushNotifier("Phone-01");
+    const dashboardWidget = new DashboardWidget("Main Dashboard");
+
+    const statsEl = document.getElementById("stats");
+
+    function updateStats() {
+      statsEl.textContent =
+`Подписчики:
+news:sports = ${eventBus.getSubscriberCount("news:sports")}
+news:tech = ${eventBus.getSubscriberCount("news:tech")}
+news:business = ${eventBus.getSubscriberCount("news:business")}
+news:urgent = ${eventBus.getSubscriberCount("news:urgent")}
+
+Email sent: ${emailNotifier.getStats().sent}
+Push sent: ${pushNotifier.getStats().sent}
+Dashboard received: ${dashboardWidget.getStats().received}`;
+    }
+
+    function subscribeAll() {
+      emailNotifier.subscribe(["tech", "business"]);
+      pushNotifier.subscribe(["sports", "tech"]);
+      dashboardWidget.subscribe(["sports", "tech", "business"]);
+      updateStats();
+    }
+
+    function unsubscribeAll() {
+      emailNotifier.unsubscribe();
+      pushNotifier.unsubscribe();
+      dashboardWidget.unsubscribe();
+      updateStats();
+    }
+
+    document.getElementById("publish-btn").addEventListener("click", () => {
+      const category = document.getElementById("category").value;
+      const headline = document.getElementById("headline").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const priority = document.getElementById("priority").value;
+
+      publisher.publishArticle(category, headline, content, priority);
+      updateStats();
+    });
+
+    document.getElementById("subscribe-btn").addEventListener("click", () => {
+      subscribeAll();
+    });
+
+    document.getElementById("unsubscribe-btn").addEventListener("click", () => {
+      unsubscribeAll();
+    });
+
+    document.getElementById("once-btn").addEventListener("click", () => {
+      eventBus.subscribeOnce("news:urgent", (article) => {
+        alert(`ONE-TIME urgent subscriber received: ${article.headline}`);
+      });
+      updateStats();
+    });
+
+    document.getElementById("demo-btn").addEventListener("click", () => {
+      const demoArticles = [
+        ["sports", "Football final tonight", "Big match starts at 20:00", "normal"],
+        ["tech", "New JavaScript runtime released", "Performance improved by 30%", "urgent"],
+        ["business", "Market opens higher", "Stocks started the day with growth", "normal"]
+      ];
+
+      demoArticles.forEach(([category, headline, content, priority], index) => {
+        setTimeout(() => {
+          publisher.publishArticle(category, headline, content, priority);
+          updateStats();
+        }, index * 800);
+      });
+    });
+
+    subscribeAll();
+    updateStats();
+  </script>
+</body>
+</html>

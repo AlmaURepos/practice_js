@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 09 Task 2 - Mediator + Command</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f8fafc;
+      color: #1f2937;
+    }
+
+    h1, h2 {
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    button, input {
+      width: 100%;
+      margin: 6px 0;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .secondary {
+      background: #6b7280;
+    }
+
+    #device-log, #history-log, #state-log {
+      min-height: 180px;
+      max-height: 320px;
+      overflow: auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 10px;
+      border: 1px solid #e5e7eb;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lab 09.2 — Mediator + Command</h1>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Light Commands</h2>
+      <button id="light-on">Включить свет</button>
+      <button id="light-off">Выключить свет</button>
+      <input id="brightness-input" type="number" min="0" max="100" value="70" />
+      <button id="set-brightness">Установить яркость</button>
+    </div>
+
+    <div class="panel">
+      <h2>Thermostat Commands</h2>
+      <input id="temp-input" type="number" min="10" max="35" value="24" />
+      <button id="set-temp">Установить температуру</button>
+    </div>
+
+    <div class="panel">
+      <h2>Security Commands</h2>
+      <button id="arm-security">Поставить на охрану</button>
+      <button id="disarm-security">Снять с охраны</button>
+    </div>
+
+    <div class="panel">
+      <h2>System Controls</h2>
+      <button id="macro-night">Запустить макрос Night Mode</button>
+      <button id="undo-btn" class="secondary">Undo</button>
+      <button id="redo-btn" class="secondary">Redo</button>
+      <button id="refresh-state" class="secondary">Обновить состояние</button>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top: 20px;">
+    <div class="panel">
+      <h2>Device Log</h2>
+      <div id="device-log"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Command History</h2>
+      <div id="history-log"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Current State</h2>
+      <div id="state-log"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import eventBus from "./pubsub/EventBus.js";
+    import { Light } from "./devices/Light.js";
+    import { Thermostat } from "./devices/Thermostat.js";
+    import { SecuritySystem } from "./devices/SecuritySystem.js";
+    import { HomeMediator } from "./mediator/HomeMediator.js";
+    import { CommandManager } from "./commands/CommandManager.js";
+    import { TurnOnLightCommand, TurnOffLightCommand, SetBrightnessCommand } from "./commands/LightCommands.js";
+    import { SetTemperatureCommand } from "./commands/ThermostatCommands.js";
+    import { ArmSecurityCommand, DisarmSecurityCommand } from "./commands/SecurityCommands.js";
+    import { MacroCommand } from "./commands/MacroCommand.js";
+
+    const mediator = new HomeMediator();
+    const manager = new CommandManager();
+
+    const livingRoomLight = new Light("Living Room Light", "Living Room");
+    const thermostat = new Thermostat("Main Thermostat", "Hall");
+    const security = new SecuritySystem("Home Security", "Main Zone");
+
+    mediator.registerDevice(livingRoomLight);
+    mediator.registerDevice(thermostat);
+    mediator.registerDevice(security);
+
+    mediator.addRule(
+      (device, state) => device.type === "security" && state.armed === true,
+      () => {
+        livingRoomLight.turnOff();
+      }
+    );
+
+    mediator.addRule(
+      (device, state) => device.type === "thermostat" && state.temperature >= 30,
+      () => {
+        console.log("[Automation] High temperature detected");
+      }
+    );
+
+    const deviceLog = document.getElementById("device-log");
+    const historyLog = document.getElementById("history-log");
+    const stateLog = document.getElementById("state-log");
+
+    eventBus.subscribe("device:change", (payload) => {
+      const line = document.createElement("div");
+      line.textContent = `${payload.device} (${payload.type}) => ${JSON.stringify(payload.state)}`;
+      deviceLog.prepend(line);
+      renderState();
+    });
+
+    function renderHistory() {
+      historyLog.textContent = manager.getHistory().join("\n") || "История пуста";
+    }
+
+    function renderState() {
+      const state = {
+        light: livingRoomLight.getState(),
+        thermostat: thermostat.getState(),
+        security: security.getState()
+      };
+
+      stateLog.textContent = JSON.stringify(state, null, 2);
+      renderHistory();
+    }
+
+    document.getElementById("light-on").addEventListener("click", () => {
+      manager.execute(new TurnOnLightCommand(livingRoomLight));
+      renderState();
+    });
+
+    document.getElementById("light-off").addEventListener("click", () => {
+      manager.execute(new TurnOffLightCommand(livingRoomLight));
+      renderState();
+    });
+
+    document.getElementById("set-brightness").addEventListener("click", () => {
+      const value = Number(document.getElementById("brightness-input").value);
+      manager.execute(new SetBrightnessCommand(livingRoomLight, value));
+      renderState();
+    });
+
+    document.getElementById("set-temp").addEventListener("click", () => {
+      const value = Number(document.getElementById("temp-input").value);
+      manager.execute(new SetTemperatureCommand(thermostat, value));
+      renderState();
+    });
+
+    document.getElementById("arm-security").addEventListener("click", () => {
+      manager.execute(new ArmSecurityCommand(security));
+      renderState();
+    });
+
+    document.getElementById("disarm-security").addEventListener("click", () => {
+      manager.execute(new DisarmSecurityCommand(security));
+      renderState();
+    });
+
+    document.getElementById("macro-night").addEventListener("click", () => {
+      const macro = new MacroCommand([
+        new TurnOffLightCommand(livingRoomLight),
+        new SetTemperatureCommand(thermostat, 20),
+        new ArmSecurityCommand(security)
+      ]);
+
+      manager.execute(macro);
+      renderState();
+    });
+
+    document.getElementById("undo-btn").addEventListener("click", () => {
+      manager.undo();
+      renderState();
+    });
+
+    document.getElementById("redo-btn").addEventListener("click", () => {
+      manager.redo();
+      renderState();
+    });
+
+    document.getElementById("refresh-state").addEventListener("click", renderState);
+
+    renderState();
+  </script>
+</body>
+</html>
