@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lab 12.2 - Nested Namespacing Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f4f6fb;
+      color: #222;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-top: 8px;
+    }
+
+    input {
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-right: 8px;
+      width: 260px;
+    }
+
+    pre {
+      background: #111827;
+      color: #f9fafb;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    #demo-area {
+      padding: 12px;
+      border: 1px dashed #bbb;
+      border-radius: 8px;
+      min-height: 40px;
+      margin-top: 12px;
+    }
+
+    .error {
+      color: #dc2626;
+    }
+
+    .success {
+      color: #16a34a;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lab 12.2 — Nested Namespacing and Library Development</h1>
+
+  <div class="card">
+    <h2>Core Info</h2>
+    <pre id="core-output"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Utilities Demo</h2>
+    <button id="run-utils">Показать utilities</button>
+    <pre id="utils-output"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Validation Demo</h2>
+    <input id="email-input" type="text" placeholder="Введите email" />
+    <button id="validate-btn">Проверить</button>
+    <pre id="validation-output"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Storage Demo</h2>
+    <button id="save-storage">Сохранить demo value</button>
+    <button id="load-storage">Прочитать demo value</button>
+    <button id="remove-storage">Удалить demo value</button>
+    <pre id="storage-output"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Router Demo</h2>
+    <button id="route-home">Перейти /home</button>
+    <button id="route-user">Перейти /user/42</button>
+    <pre id="router-output"></pre>
+  </div>
+
+  <div class="card">
+    <h2>Plugin Injection Demo</h2>
+    <button id="inject-plugin">Добавить custom plugin</button>
+    <pre id="plugin-output"></pre>
+  </div>
+
+  <script src="./namespace/core.js"></script>
+  <script src="./namespace/utils.js"></script>
+  <script src="./namespace/plugins.js"></script>
+
+  <script>
+    document.getElementById("core-output").textContent = JSON.stringify(
+      {
+        name: MyApp.core.name,
+        version: MyApp.core.version,
+        namespaces: Object.keys(MyApp)
+      },
+      null,
+      2
+    );
+
+    document.getElementById("run-utils").addEventListener("click", function () {
+      var result = {
+        unique: MyApp.utils.array.unique([1, 2, 2, 3, 3, 4]),
+        compact: MyApp.utils.array.compact([0, 1, false, 2, "", 3, null]),
+        difference: MyApp.utils.array.difference([1, 2, 3, 4], [2, 4]),
+        chunk: MyApp.utils.array.chunk([1, 2, 3, 4, 5, 6], 2),
+        capitalize: MyApp.utils.string.capitalize("heLLo"),
+        titleize: MyApp.utils.string.titleize("hello world from js"),
+        slugify: MyApp.utils.string.slugify("Hello World From JS"),
+        truncate: MyApp.utils.string.truncate("This is a very long sentence", 14),
+        template: MyApp.utils.string.template("Hello {{name}}", { name: "Aidos" }),
+        formatDate: MyApp.utils.date.format(new Date(), "YYYY-MM-DD HH:mm:ss"),
+        isToday: MyApp.utils.date.isToday(new Date()),
+        daysDiff: MyApp.utils.date.daysDiff("2026-04-01", "2026-04-10"),
+        random: MyApp.utils.number.random(10, 20),
+        clamp: MyApp.utils.number.clamp(120, 0, 100),
+        formatNumber: MyApp.utils.number.format(123456789)
+      };
+
+      document.getElementById("utils-output").textContent = JSON.stringify(result, null, 2);
+    });
+
+    document.getElementById("validate-btn").addEventListener("click", function () {
+      var email = document.getElementById("email-input").value.trim();
+
+      var result = MyApp.plugins.validation.validate(
+        { email: email },
+        {
+          email: {
+            required: true,
+            pattern: MyApp.plugins.validation.rules.email,
+            message: "Введите корректный email"
+          }
+        }
+      );
+
+      document.getElementById("validation-output").textContent = JSON.stringify(result, null, 2);
+    });
+
+    document.getElementById("save-storage").addEventListener("click", function () {
+      var ok = MyApp.plugins.storage.local.set("demo-user", {
+        name: "Aidos",
+        role: "student"
+      });
+
+      document.getElementById("storage-output").textContent = ok
+        ? "Значение сохранено"
+        : "Ошибка сохранения";
+    });
+
+    document.getElementById("load-storage").addEventListener("click", function () {
+      var value = MyApp.plugins.storage.local.get("demo-user");
+      document.getElementById("storage-output").textContent = JSON.stringify(value, null, 2);
+    });
+
+    document.getElementById("remove-storage").addEventListener("click", function () {
+      var ok = MyApp.plugins.storage.local.remove("demo-user");
+      document.getElementById("storage-output").textContent = ok
+        ? "Значение удалено"
+        : "Ошибка удаления";
+    });
+
+    MyApp.plugins.router.addRoute("/home", function () {
+      document.getElementById("router-output").textContent =
+        "Текущий маршрут: /home";
+    });
+
+    MyApp.plugins.router.addRoute("/user/:id", function (params) {
+      document.getElementById("router-output").textContent =
+        "Маршрут user, id = " + params.id;
+    });
+
+    document.getElementById("route-home").addEventListener("click", function () {
+      MyApp.plugins.router.navigate("/home");
+    });
+
+    document.getElementById("route-user").addEventListener("click", function () {
+      MyApp.plugins.router.navigate("/user/42");
+    });
+
+    document.getElementById("inject-plugin").addEventListener("click", function () {
+      MyApp.plugins.register("plugins.math", {
+        sum: function (a, b) {
+          return a + b;
+        },
+        multiply: function (a, b) {
+          return a * b;
+        }
+      });
+
+      var result = {
+        sum: MyApp.plugins.math.sum(5, 7),
+        multiply: MyApp.plugins.math.multiply(6, 8)
+      };
+
+      document.getElementById("plugin-output").textContent = JSON.stringify(result, null, 2);
+    });
+  </script>
+</body>
+</html>

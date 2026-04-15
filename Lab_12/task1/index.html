@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>Lab 12 - Module Systems Demo</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    h1, h2 {
+      margin-top: 0;
+    }
+
+    pre {
+      background: #111827;
+      color: #f9fafb;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+      margin-right: 10px;
+      margin-top: 10px;
+    }
+
+    #output {
+      min-height: 120px;
+    }
+  </style>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.7/underscore-umd-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+</head>
+<body>
+  <h1>Lab 12 — Modular JavaScript and Namespacing Patterns</h1>
+
+  <div class="card">
+    <h2>AMD Demo</h2>
+    <button id="run-amd">Запустить AMD demo</button>
+    <pre id="amd-output"></pre>
+  </div>
+
+  <div class="card">
+    <h2>UMD Demo</h2>
+    <button id="run-umd">Запустить UMD demo</button>
+    <pre id="umd-output"></pre>
+  </div>
+
+  <div class="card">
+      <strong>RUN demo/commonjs-demo.js</strong>
+    </div>
+  </div>
+
+  <script>
+    require.config({
+      paths: {
+        jquery: "https://code.jquery.com/jquery-3.7.1.min",
+        underscore: "https://cdn.jsdelivr.net/npm/underscore@1.13.7/underscore-umd-min"
+      }
+    });
+
+    document.getElementById("run-amd").addEventListener("click", function () {
+      require(["./modules/amd/MyLib"], function (MyLib) {
+        var result = [];
+        result.push("AMD version: " + MyLib.version);
+        result.push("unique: " + JSON.stringify(MyLib.utils.array.unique([1, 2, 2, 3, 3])));
+        result.push("flatten: " + JSON.stringify(MyLib.utils.array.flatten([1, [2, [3, 4]]])));
+        result.push("capitalize: " + MyLib.utils.string.capitalize("hello"));
+        result.push("trim: '" + MyLib.utils.string.trim("   text   ") + "'");
+
+        document.getElementById("amd-output").textContent = result.join("\n");
+      });
+    });
+  </script>
+
+  <script>
+    document.getElementById("run-umd").addEventListener("click", function () {
+      require(["./modules/umd/MyLib"], function (MyLib) {
+        var result = [];
+        result.push("UMD version: " + MyLib.version);
+        result.push("unique: " + JSON.stringify(MyLib.utils.array.unique([1, 2, 2, 3, 4, 4])));
+        result.push("flatten: " + JSON.stringify(MyLib.utils.array.flatten([1, [2, [3, 4]]])));
+        result.push("template: " + MyLib.utils.string.template("Hello {{name}}", { name: "Aidos" }));
+        result.push("merge: " + JSON.stringify(MyLib.utils.object.merge({ a: 1 }, { b: 2 }, { c: 3 })));
+
+        var emitter = new MyLib.events.EventEmitter();
+        var messages = [];
+
+        emitter.on("test", function (msg) {
+          messages.push("Event received: " + msg);
+        });
+
+        emitter.emit("test", "UMD Event Works");
+        result.push(messages.join("\n"));
+
+        document.getElementById("umd-output").textContent = result.join("\n");
+      });
+    });
+  </script>
+</body>
+</html>
