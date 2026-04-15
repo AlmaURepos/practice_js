@@ -1,0 +1,12 @@
+[
+  { "id": 1, "title": "React hooks overview", "category": "react" },
+  { "id": 2, "title": "Understanding useEffect cleanup", "category": "react" },
+  { "id": 3, "title": "Design patterns in JavaScript", "category": "patterns" },
+  { "id": 4, "title": "Higher-Order Components with examples", "category": "react" },
+  { "id": 5, "title": "Working with async fetch", "category": "api" },
+  { "id": 6, "title": "Caching strategies for frontend", "category": "performance" },
+  { "id": 7, "title": "Custom hooks composition", "category": "react" },
+  { "id": 8, "title": "Debounce and throttle patterns", "category": "performance" },
+  { "id": 9, "title": "State management basics", "category": "react" },
+  { "id": 10, "title": "Error handling in API calls", "category": "api" }
+]
