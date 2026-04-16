@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Islands Architecture E-Commerce</title>
+  <style>
+    body {
+      font-family: Inter, Arial, sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 24px;
+      background: #f9fafb;
+      color: #1f2937;
+    }
+
+    h1 {
+      margin-bottom: 16px;
+    }
+
+    .ocean-text {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .island {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      background: #fff;
+    }
+
+    .island-title {
+      font-size: 0.9em;
+      color: green;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .counter-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #2563eb;
+      color: white;
+    }
+
+    button:hover {
+      opacity: 0.95;
+    }
+
+    .count-display {
+      font-weight: 700;
+      font-size: 20px;
+    }
+
+    .preview-box {
+      width: 100%;
+      height: 50px;
+      background: #000;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    .hydration-note {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Premium Mechanical Keyboard</h1>
+
+  <p class="ocean-text">
+    This paragraph is served statically. No JavaScript is required to read this beautiful
+    product description. The architecture ensures that only highly interactive widgets are loaded.
+  </p>
+
+  <!-- Island 1: Shopping Cart Counter -->
+  <div class="island" data-island-type="counter">
+    <div class="island-title">Interactive Island: Counter</div>
+    <p>Units: <span class="count-display">0</span></p>
+
+    <div class="counter-controls">
+      <button class="btn-decrease">-</button>
+      <button class="btn-increase">+</button>
+    </div>
+
+    <div class="hydration-note">Hydrates only when this island becomes visible.</div>
+  </div>
+
+  <p class="ocean-text">
+    More static text explaining the delivery constraints and warranty policies.
+    Completely dead HTML. This area is part of the static ocean and needs no JavaScript.
+  </p>
+
+  <!-- Island 2: Color Picker -->
+  <div class="island" data-island-type="color-picker">
+    <div class="island-title">Interactive Island: Color Picker</div>
+
+    <div class="preview-box"></div>
+
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button data-color="#000">Black</button>
+      <button data-color="#0066cc">Blue</button>
+      <button data-color="#dc3545">Red</button>
+    </div>
+
+    <div class="hydration-note">This widget has isolated state separate from the counter island.</div>
+  </div>
+
+  <p class="ocean-text">
+    Final static section with store information, support details, and additional non-interactive
+    content. This demonstrates how interactive islands can live inside a mostly static page.
+  </p>
+
+  <script type="module" src="./islands-engine.js"></script>
+</body>
+</html>
